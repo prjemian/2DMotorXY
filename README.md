@@ -13,4 +13,4 @@ XY stage (in addition to methods supporting other features):
 class | subclass | purpose
 :--- | :--- | :---
 `MMC_Positioner` | `ophyd.SoftPositioner` | connect with this 2D motor stage
-`TwoD_XY_StagePositioner` | `ophyd.PseudoPositioner` | add separate x & y axis controls for scans
+`TwoD_XY_StagePositioner` | `ophyd.PseudoPositioner` | (NOT WORKING YET) add separate x & y axis controls for scans
