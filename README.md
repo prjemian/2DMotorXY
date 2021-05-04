@@ -13,8 +13,8 @@ XY stage (in addition to methods supporting other features):
 class | subclass | purpose | notebook
 :--- | :--- | :--- | :---
 `SimMMC` | | simulate MMC controller | [demonstrate_SimMMC_controller](https://nbviewer.jupyter.org/github/prjemian/2DMotorXY/blob/main/demonstrate_SimMMC_controller.ipynb)
-`MMC_Positioner` | `ophyd.SoftPositioner` | connect `SimMMC` with ophyd | [demonstrate_MMC_Positioner](https://nbviewer.jupyter.org/github/prjemian/2DMotorXY/blob/main/demonstrate_MMC_Positioner.ipynb)
-`TwoD_XY_StagePositioner` | `ophyd.PseudoPositioner` | (NOT WORKING YET) add separate x & y axis controls for scans | [demonstrate_TwoD_XY_StagePositioner](https://nbviewer.jupyter.org/github/prjemian/2DMotorXY/blob/main/demonstrate_TwoD_XY_StagePositioner.ipynb)
+`SoftMMCPositioner` | `ophyd.SoftPositioner` | connect existing `SimMMC` object with ophyd | [demonstrate_SoftMMCPositioner](https://nbviewer.jupyter.org/github/prjemian/2DMotorXY/blob/main/demonstrate_SoftMMCPositioner.ipynb)
+`xy_positioner` | `ophyd.SignalPositionerMixin` | add separate x & y axis controls for scans | [demonstrate_TwoD_XY_StagePositioner](https://nbviewer.jupyter.org/github/prjemian/2DMotorXY/blob/main/demonstrate_TwoD_XY_StagePositioner.ipynb)
 
 ## Additional
 
