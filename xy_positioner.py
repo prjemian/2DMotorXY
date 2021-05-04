@@ -1,4 +1,6 @@
+from mmc_positioner import SoftMMCPositioner
 from ophyd import Component
+from ophyd import DynamicDeviceComponent as DDCpt
 from ophyd import PseudoPositioner
 from ophyd import PseudoSingle
 from ophyd import SoftPositioner
@@ -12,7 +14,7 @@ class TwoD_XY_StagePositioner(PseudoPositioner):
     y = Component(PseudoSingle, target_initial_position=True)
 
     # The real (or physical) positioners:
-    # pair = Component(SoftPositioner)
+    # NOTE: ``mmc`` object MUST be defined`` first.
     pair = Component(SoftMMCPositioner, mmc=mmc)
 
     @pseudo_position_argument
@@ -25,10 +27,13 @@ class TwoD_XY_StagePositioner(PseudoPositioner):
         """Run an inverse (real -> pseudo) calculation (return x & y)."""
         if len(real_pos) == 1:
             if real_pos.pair is None:
+                # as called from .move()
                 x, y = self.pair.mmc.xy
             else:
+                # initial call, get position from the hardware
                 x, y = tuple(real_pos.pair)
         elif len(real_pos) == 2:
+            # as called directly
             x, y = real_pos
         else:
             raise ValueError(
