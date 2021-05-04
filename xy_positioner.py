@@ -6,6 +6,10 @@ from ophyd import PseudoSingle
 from ophyd import SoftPositioner
 from ophyd.pseudopos import pseudo_position_argument
 from ophyd.pseudopos import real_position_argument
+from sim_mmc_controller import SimMMC
+
+
+mmc = SimMMC()
 
 class TwoD_XY_StagePositioner(PseudoPositioner):
 
