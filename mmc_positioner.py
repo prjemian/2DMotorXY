@@ -2,45 +2,50 @@
 Mock MMC support in ophyd/Bluesky
 """
 
+from ophyd import Component
 from ophyd import Signal
-from ophyd import SoftPositioner
+from ophyd.mixins import SignalPositionerMixin
+from ophyd.status import MoveStatus
 from sim_mmc_controller import SimMMC
+import threading
 import time
+import warnings
 
+class SoftMMCPositioner(SignalPositionerMixin, Signal):
 
-class MMC_Positioner(SoftPositioner):
-    """Connect MMC controller as ``ophyd.SoftPositioner``."""
-    mmc = SimMMC()
-    mmc_wait_poll_interval_s = 0.01
-    mmc_timeout_s = 10
+    _move_thread = None
 
-    def __init__(self, *args, mmc_label="", **kwargs):
-        kwargs["source"] = "MMC 2D XY Stage Controller"
-        self.mmc_wait_label = mmc_label
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args, mmc=None, mmc_label="", **kwargs):
+        self.mmc = mmc
+        self.mmc_label = mmc_label
 
-    def _set_position(self, value, **kwargs):
-        self.mmc.setXYPosition(value)
-        self._started_moving = True
-        self._moving = True
+        super().__init__(*args, set_func=self._write_xy, **kwargs)
 
-        time_expires = time.time() + self.mmc_timeout_s
-        while self.mmc.waitForDevice(self.mmc_wait_label):
-            if time.time() > time_expires:
-                raise TimeoutError(
-                    f"Timeout waiting {timeout:f}s for {self.name}"
-                )
-            time.sleep(self.mmc_wait_poll_interval_s)
-
-        self._started_moving = False
-        self._moving = False
-
-        self._position = self.mmc.getXYPosition()
-
-    def get(self, **kwargs):
-        '''The readback value'''
+        # get the position from the controller on startup
         self._readback = self.mmc.getXYPosition()
-        return self._readback
+
+    def _write_xy(self, value, **kwargs):
+        if self._move_thread is not None:
+            # The MoveStatus object defends us; this is just an additional safeguard.
+            # Do not ever expect to see this warning.
+            warnings.warn("Already moving.  Will not start new move.")
+        st = MoveStatus(self, target=value)
+
+        def moveXY():
+            self.mmc.setXYPosition(value)
+            # ALWAYS wait for the device
+            self.mmc.waitForDevice(self.mmc_label)
+
+            # update the _readback attribute (which triggers other ophyd actions)
+            self._readback = self.mmc.getXYPosition()
+
+            # MUST set to None BEFORE declaring status True
+            self._move_thread = None
+            st.set_finished()
+
+        self._move_thread = threading.Thread(target=moveXY)
+        self._move_thread.start()
+        return st
 
 
 def demonstrate_mmc_positioner(mmc):
